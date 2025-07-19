@@ -1,6 +1,8 @@
 // components/PricingCard.tsx
 "use client";
 
+import { useState } from 'react';
+
 interface PricingCardProps {
   name: string;
   price: string;
@@ -11,21 +13,41 @@ interface PricingCardProps {
 }
 
 export function PricingCard({ name, price, period, features, buttonText, popular = false }: PricingCardProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleButtonClick = () => {
     if (name === "Pro") {
-      // Redirect to payment page for Pro upgrade
-      window.open("https://checkout.stripe.com/pay/cs_test_tabgenius_pro", "_blank");
-    } else {
-      // For free plan, scroll to top and show browser selection
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setIsLoading(true);
+      
+      // Your PayPal payment link
+      window.open("https://www.paypal.com/ncp/payment/RL32H86GJGSMA", "_blank");
+      
+      // Reset loading state after a delay
       setTimeout(() => {
-        // Show browser selection modal or highlight browser buttons
-        const browserButtons = document.querySelector('.browser-selection');
-        if (browserButtons) {
-          browserButtons.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 500);
+        setIsLoading(false);
+      }, 2000);
+    } else if (name === "Free") {
+      // Handle free plan - scroll to download section
+      scrollToDownload();
+    } else {
+      // Handle other plans (Enterprise, etc.)
+      handleOtherPlans();
     }
+  };
+
+  const scrollToDownload = () => {
+    const downloadSection = document.getElementById('download');
+    if (downloadSection) {
+      downloadSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Fallback: scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleOtherPlans = () => {
+    // For enterprise or custom plans
+    window.open("mailto:contact@tabgenius.com?subject=Enterprise Plan Inquiry", "_blank");
   };
 
   return (
@@ -67,13 +89,21 @@ export function PricingCard({ name, price, period, features, buttonText, popular
         
         <button 
           onClick={handleButtonClick}
+          disabled={isLoading}
           className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
             popular 
               ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:scale-105 shadow-lg hover:shadow-emerald-500/25' 
               : 'bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700'
-          }`}
+          } ${isLoading ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}`}
         >
-          {buttonText}
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Opening PayPal...
+            </div>
+          ) : (
+            buttonText
+          )}
         </button>
       </div>
     </div>
