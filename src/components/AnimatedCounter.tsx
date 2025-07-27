@@ -1,62 +1,85 @@
-// components/AnimatedCounter.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface AnimatedCounterProps {
   target: number;
   decimals?: number;
-  duration?: number;
+  duration?: number; // ms
+  className?: string; // for easy styling
 }
 
-export function AnimatedCounter({ target, decimals = 0, duration = 2000 }: AnimatedCounterProps) {
+let counterId = 0; // used to generate unique ids
+
+export function AnimatedCounter({
+  target,
+  decimals = 0,
+  duration = 2000,
+  className = "",
+}: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
+  // Generate a unique id for each instance
+const localIdRef = useRef<number | undefined>(undefined);
 
-    const element = document.getElementById(`counter-${target}`);
-    if (element) {
-      observer.observe(element);
-    }
+  if (localIdRef.current === undefined) {
+    localIdRef.current = ++counterId;
+  }
+  const counterIdStr = `counter-${localIdRef.current}`;
+
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true);
+      },
+      { threshold: 0.2 }
+    );
+    const el = document.getElementById(counterIdStr);
+    if (el) observer.observe(el);
 
     return () => observer.disconnect();
-  }, [target]);
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
     if (!isVisible) return;
 
-    let startTime: number;
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const elapsed = currentTime - startTime;
+    let startTime: number | null = null;
+    let frame: number;
+
+    const animate = (now: number) => {
+      if (startTime === null) startTime = now;
+      const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentCount = target * easeOutQuart;
-
-      setCount(currentCount);
+      // Ease-out quart
+      const eased = 1 - Math.pow(1 - progress, 4);
+      setCount(target * eased);
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        frame = requestAnimationFrame(animate);
+      } else {
+        setCount(target); // snap to target on finish
       }
     };
 
-    requestAnimationFrame(animate);
+    frame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(frame);
   }, [isVisible, target, duration]);
 
   return (
-    <span id={`counter-${target}`}>
-      {count.toFixed(decimals)}
+    <span
+      id={counterIdStr}
+      className={className}
+      aria-live="polite"
+      aria-label={count.toLocaleString(undefined, { maximumFractionDigits: decimals })}
+    >
+      {Number(count).toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
     </span>
   );
 }
