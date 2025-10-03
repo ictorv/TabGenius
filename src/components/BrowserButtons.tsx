@@ -34,7 +34,7 @@ export function BrowserButtons() {
           hover:-translate-y-0.5
           focus:outline-none focus:ring-2 focus:ring-blue-100
         "
-        aria-label="Add TabGenius to Chrome"
+        aria-label="Add to Chrome"
       >
         <div className="w-9 h-9 bg-zinc-50 rounded-lg flex items-center justify-center shadow-sm">
           {/* Chrome SVG: true multi-color, not just circles */}
@@ -67,7 +67,7 @@ export function BrowserButtons() {
           hover:-translate-y-0.5
           focus:outline-none focus:ring-2 focus:ring-orange-100
         "
-        aria-label="Add TabGenius to Firefox"
+        aria-label="Add to Firefox"
       >
         <div className="w-9 h-9 bg-zinc-50 rounded-lg flex items-center justify-center shadow-sm">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -105,7 +105,7 @@ export function BrowserButtons() {
           hover:-translate-y-0.5
           focus:outline-none focus:ring-2 focus:ring-cyan-100
         "
-        aria-label="Add TabGenius to Edge"
+        aria-label="Add to Edge"
       >
         <div className="w-9 h-9 bg-zinc-50 rounded-lg flex items-center justify-center shadow-sm">
           {/* Modern Edge logo */}
